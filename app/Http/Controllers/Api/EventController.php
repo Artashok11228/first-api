@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Attendee;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class EventController extends Controller
@@ -12,7 +14,7 @@ class EventController extends Controller
      */
     public function index()
     {
-        //
+        return \App\Models\User::all();
     }
 
     /**
@@ -44,6 +46,9 @@ class EventController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $atendee = Attendee::query()->first();
+        return $atendee->user->email;
+        User::query()->find($id)->delete();
+        return response('man deletesh karadm', 204);
     }
 }

@@ -22,6 +22,7 @@ class AttendeeSeeder extends Seeder
                 \App\Models\Attendee::create([
                     'user_id' => $user->id,
                     'event_id' => $event->id,
+                    'name' => fake()->name()
                 ]);
             };
         };
