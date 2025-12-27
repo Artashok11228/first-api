@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers\Api;
 
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use App\Http\Controllers\Controller;
 use App\Models\Attendee;
 use App\Models\User;
 use Illuminate\Http\Request;
+use App\Models\Event;
 
 class EventController extends Controller
 {
@@ -14,7 +16,7 @@ class EventController extends Controller
      */
     public function index()
     {
-        return \App\Models\User::all();
+        return Event::all();
     }
 
     /**
@@ -22,15 +24,30 @@ class EventController extends Controller
      */
     public function store(Request $request)
     {
-        //
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'start_time' => 'required|date',
+            'end_time' => 'required|date|after:start_time',
+        ]);
+
+
+        $event = Event::create(array_merge($validated, [
+            'user_id' => 1,
+        ]));
+
+        // بازگشت رویداد تازه ایجادشده
+        return response()->json($event, 201);
     }
+
 
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(Event $event)
     {
-        //
+        return $event;
     }
 
     /**
@@ -38,17 +55,44 @@ class EventController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+
+
+        $validated = $request->validate([
+            'name' => 'sometimes|string|max:255',
+            'description' => 'sometimes|string',
+            'start_time' => 'sometimes|date',
+            'end_time' => 'sometimes|date|after:start_time',
+        ]);
+        $event = Event::findOrFail($id);
+        $event ->update(array_merge($validated, [
+            'user_id' => 1,
+        ]));
+
+        return response()->json($event, 200);
+
+
+        // بازگشت رویداد تازه ایجادشده
+
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Event $event)
     {
-        $atendee = Attendee::query()->first();
-        return $atendee->user->email;
-        User::query()->find($id)->delete();
-        return response('man deletesh karadm', 204);
+        $exist = Event::find($event);
+
+        if(!$exist){
+        return response()->json(['message' => 'no fucking event as this one !'] , 404);
+    } else {
+        $event->delete();
+
+        return response()->json([
+            'message' => 'event got fucked !'
+        ],201);
     }
-}
+
+    }
+
+
+
